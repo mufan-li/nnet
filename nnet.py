@@ -35,6 +35,10 @@ class nnet(object):
 		self.v = np.zeros(self.w.shape) # momentum
 		self.dLdw = np.zeros(self.w.shape)
 
+		# activation function
+		self.act = relu;
+		self.actd = relud;
+
 	# input data
 	def input(self,X,Y):
 		nninput(self,X,Y)

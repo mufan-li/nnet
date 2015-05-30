@@ -31,8 +31,8 @@ class error(object):
 		print('Iteration: '+str(t), 
 			'Time: '+str(np.round(time.time()-self.start,2))+'seconds',
 			'Progress: '+str(np.round(float(t)/self.tN*100))+'%')
-		print('Train Error: '+str(np.round(self.train[t]*100,2))+'%',
-			'Valid Error: '+str(np.round(self.valid[t/self.fN]*100,2))+'%')
+		print('Train Error: '+str(np.round(self.train[t],4)),
+			'Valid Error: '+str(np.round(self.valid[t/self.fN],4)))
 		print('\n')
 
 	def plot(self,nn,valid):
@@ -46,11 +46,13 @@ class error(object):
 		plt.xlabel('Number of Iterations')
 		plt.ylabel('Mean Squared Error')
 		plt.title('Training & Validation Errors')
+		plt.legend()
 
 		plt.subplot(212)
 		plt.plot(valid.x[:,1],nn.F[0,:],'ro',label='Prediction')
 		plt.plot(valid.x[:,1],valid.y[:,0],'bx',label='True Value')
 		plt.title('Prediction vs. True Values')
+		plt.legend()
 
 		pltfig.tight_layout()
 		plt.show()

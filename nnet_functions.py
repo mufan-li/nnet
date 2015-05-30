@@ -31,6 +31,20 @@ def nninput(nn,X,Y):
 	nn.X = X.transpose() # input
 	nn.Y = Y.transpose() # output
 
+# relu activation
+def relu(x):
+	return np.maximum(x,0)
+# derivative of relu
+def relud(gx):
+	return (gx>0).astype(int)
+
+# sigmoid activation
+def sigm(x):
+	return 1/(1+np.exp(-x))
+# derivative of sigmoid
+def sigmd(gx):
+	return gx * (1-gx)
+
 # forward propagation through a neural net
 def fprop(nn):
 	# reset from previous fprop
@@ -45,7 +59,7 @@ def fprop(nn):
 		i = np.arange(layer[k],layer[k+1])
 		j = np.arange(layer[k+1],layer[k+2])
 		nn.x[j,:] = np.dot(nn.w[i][:,j].transpose(), nn.gx[i,:])
-		nn.gx[j,:] = np.maximum(nn.x[j,:],0) # relu activation
+		nn.gx[j,:] = nn.act(nn.x[j,:]) # relu activation
 
 	# output layer
 	i = j
@@ -62,11 +76,12 @@ def bprop(nn):
 	# reset derivatives
 	nn.dLdw *= 0
 	dLdx = np.zeros(nn.x.shape)
-	dgdx = (nn.x > 0).astype(int) # for relu
+	dgdx = nn.actd(nn.gx) # softmax is ignored here
 
 	layer = np.cumsum([0,nn.xN] + nn.hV)
 	# output layer
 	n = range(layer[-1],nn.N)
+	dgdx[n,:] = 0; # softmax layer
 	m = range(layer[-2],layer[-1])
 	dLdx[n,:] = nn.Y - nn.gx[n,:]
 	nn.dLdw[m[0]:m[-1]+1,n[0]:n[-1]+1] = \

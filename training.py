@@ -1,9 +1,9 @@
 
 # script for training nnet
-hV = [100, 100]
+hV = [100,100]
 bN = 50 # mini-batch size
 eta = 1e-5 # learning rate
-tN = int(1e3) # epochs/sgd iterations
+tN = int(1e4) # epochs/sgd iterations
 fN = 100 # update frequency
 
 nn = nnet(train.xN, hV, train.yN, bN)
@@ -28,7 +28,7 @@ for t in range(tN):
 nn.input(test.x[:,:], test.y[:,:])
 nn.fp()
 print( 'Test Error: '+str(np.round(
-	np.square(nn.Y-nn.F).mean()*100,2)) + '%' )
+	np.square(nn.Y-nn.F).mean(),4)) )
 
 # plot results
-er.plot(nn,valid)
+er.plot(nn,test)

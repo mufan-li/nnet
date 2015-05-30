@@ -13,9 +13,9 @@ from nnet import *
 from data import *
 from error import *
 
-x = rd.uniform(-5,5,1000)
+x = rd.uniform(0,5,1000)
 x = np.array(x, ndmin = 2).transpose()
-y = np.abs(np.sin(x)/2) + rd.normal(0,0.05,1000)
+y = np.abs(np.sin(x)) #+ rd.normal(0,0.01,1000)
 y = np.concatenate([y, 1-y],1)
 
 train = data(x[:800,:], y[:800,:])
