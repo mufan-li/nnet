@@ -4,7 +4,7 @@
 # from pandas.io.data import DataReader
 from datetime import datetime
 import matplotlib as mpl
-mpl.run('Agg')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.random as rd

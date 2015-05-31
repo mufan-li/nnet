@@ -1,9 +1,9 @@
 
 # script for training nnet
-hV = [1000 1000]
-bN = 100 # mini-batch size
-eta = 1e-5 # learning rate
-tN = int(1e4) # epochs/sgd iterations
+hV = [1000, 1000]
+bN = 500 # mini-batch size
+eta0 = 1e-5 # learning rate
+tN = int(5e5) # epochs/sgd iterations
 fN = 100 # update frequency
 
 nn = nnet(train.xN, hV, train.yN, bN)
@@ -11,10 +11,12 @@ er = error(tN)
 
 for t in range(tN):
 	bInd = rd.randint(0,train.N,bN)
+	# consider creating a method for training
 	nn.input(train.x[bInd,:], train.y[bInd,:])
 
 	nn.fp()
 	nn.bp()
+	eta = eta0 / np.power(2,np.int(t*4/tN)) # reduce learning rate
 	nn.v += eta/bN*nn.dLdw
 	nn.w += nn.v
 
@@ -35,3 +37,6 @@ print( 'Test Error Rate: ' + str(np.round(nn.ER(),4)) )
 er.plot(nn,test)
 
 np.save('weights', nn.w)
+np.save('trainER', er.trainER)
+np.save('validER', er.validER)
+execfile('email2.py')

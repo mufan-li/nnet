@@ -32,13 +32,18 @@ class error(object):
 		self.validER[t/self.fN] = nn.ER()
 
 	def update(self,t):
+		cur = time.time()-self.start
+		prog = float(t+1)/self.tN
 		print('Iteration: '+str(t), 
-			'Time: '+str(np.round(time.time()-self.start,2))+'seconds',
-			'Progress: '+str(np.round(float(t)/self.tN*100))+'%')
+			'Time Elapsed: '+str(np.round(cur,2))+'seconds',
+			'Progress: '+str(np.round(prog*100))+'%',
+			'Time Left: '
+				+str(np.round(cur/prog*(1-prog)/60,2))+'minutes')
 		print('Train MSE: '+str(np.round(self.trainMSE[t],4)),
 			'Train Error Rate: '+str(np.round(self.trainER[t],4)))
 		print('Valid MSE: '+str(np.round(self.validMSE[t/self.fN],4)),
-			'Valid Error Rate: '+str(np.round(self.validER[t/self.fN],4)))
+			'Valid Error Rate: '
+				+str(np.round(self.validER[t/self.fN],4)))
 		print('\n')
 
 	def plot(self,nn,valid):
