@@ -1,7 +1,7 @@
 
 # script for training nnet
-hV = [100,100]
-bN = 50 # mini-batch size
+hV = [1000]
+bN = 100 # mini-batch size
 eta = 1e-5 # learning rate
 tN = int(1e4) # epochs/sgd iterations
 fN = 100 # update frequency
@@ -10,8 +10,8 @@ nn = nnet(train.xN, hV, train.yN, bN)
 er = error(tN)
 
 for t in range(tN):
-	# insert function for selecting mini-batch
-	nn.input(train.x[:,:], train.y[:,:])
+	bInd = rd.randint(0,train.N,bN)
+	nn.input(train.x[bInd,:], train.y[bInd,:])
 
 	nn.fp()
 	nn.bp()
@@ -27,8 +27,9 @@ for t in range(tN):
 # add test function for fp
 nn.input(test.x[:,:], test.y[:,:])
 nn.fp()
-print( 'Test Error: '+str(np.round(
+print( 'Test MSE: '+str(np.round(
 	np.square(nn.Y-nn.F).mean(),4)) )
+print( 'Test Error Rate: ' + np.round(nn.ER(),4) )
 
 # plot results
 er.plot(nn,test)

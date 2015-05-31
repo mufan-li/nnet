@@ -98,6 +98,24 @@ def bprop(nn):
 
 	return
 
+# error rate for classification problem
+def nnER(nn):
+	Find = np.argmax(nn.F,0)
+	F1 = np.zeros(nn.F.shape)
+	F1[Find,range(nn.bN)] = 1
+
+	# note divide by 2 to avoid double counting
+	return np.abs(nn.Y - F1).sum()/nn.bN/2
+
+
+
+
+
+
+
+
+
+
 
 
 

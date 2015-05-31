@@ -50,6 +50,9 @@ class nnet(object):
 	def bp(self):
 		bprop(self)
 
+	def ER(self):
+		return nnER(self)
+
 if __name__ == "__main__":
 	testnn = nnet(2,[2,3],2,5)
 	print testnn.w.shape
