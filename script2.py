@@ -1,9 +1,11 @@
 # script2.py
 # generate sample training data for testing
 
-import pandas as pd
-from pandas.io.data import DataReader
+# import pandas as pd
+# from pandas.io.data import DataReader
 from datetime import datetime
+import matplotlib as mpl
+mpl.run('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.random as rd

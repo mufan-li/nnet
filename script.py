@@ -1,6 +1,10 @@
-import pandas as pd
-from pandas.io.data import DataReader
+# script.py
+
+# import pandas as pd
+# from pandas.io.data import DataReader
 from datetime import datetime
+import matplotlib as mpl
+mpl.run('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.random as rd

@@ -1,6 +1,6 @@
 
 # script for training nnet
-hV = [1000]
+hV = [1000 1000]
 bN = 100 # mini-batch size
 eta = 1e-5 # learning rate
 tN = int(1e4) # epochs/sgd iterations
@@ -29,7 +29,9 @@ nn.input(test.x[:,:], test.y[:,:])
 nn.fp()
 print( 'Test MSE: '+str(np.round(
 	np.square(nn.Y-nn.F).mean(),4)) )
-print( 'Test Error Rate: ' + np.round(nn.ER(),4) )
+print( 'Test Error Rate: ' + str(np.round(nn.ER(),4)) )
 
 # plot results
 er.plot(nn,test)
+
+np.save('weights', nn.w)
