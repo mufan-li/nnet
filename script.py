@@ -12,7 +12,8 @@ from data import *
 from error import *
 
 # import data from pickle file
-mnist_file = '/Users/billli/Dropbox/Homework/ECE521/A5/mnist.pkl'
+# mnist_file = '/Users/billli/Dropbox/Homework/ECE521/A5/mnist.pkl'
+mnist_file = 'mnist.pkl'
 mnist_data = pickle.load( open( mnist_file, "rb" ) )
 tmp = np.zeros((mnist_data['y_test'].shape[0],10))
 
