@@ -2,6 +2,8 @@ import numpy as np
 import numpy.random as rd
 import theano.tensor as T
 import theano
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import pickle
 
