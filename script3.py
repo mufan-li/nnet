@@ -3,40 +3,74 @@ import numpy.random as rd
 import theano.tensor as T
 import theano
 import matplotlib.pyplot as plt
+import pickle
 
 from nnet2 import *
 
-# theano.config.exception_verbosity = 'high'
-# theano.config.optimizer = 'None'
+theano.config.exception_verbosity = 'high'
+theano.config.optimizer = 'None'
 
-sN = 100
-learning_rate = 1e-1
-momentum = 0.5
-bN = 10
+print '...loading file'
+mnist_file = 'mnist.pkl'
+mnist_data = pickle.load( open( mnist_file, "rb" ) )
+tmp = np.zeros((mnist_data['y_test'].shape[0],10))
+
+for k in range(mnist_data['y_test'].shape[0]):
+	idx = np.mod(mnist_data['y_test'][k],10)
+	tmp[k,idx] = 1
+
+mnist_data['Y_test'] = tmp
+
+def shared_dataset(data_x, data_y, borrow=True):
+	shared_x = theano.shared(np.matrix(data_x,
+									dtype=theano.config.floatX),
+							 borrow=borrow)
+	shared_y = theano.shared(np.matrix(data_y,
+									dtype=theano.config.floatX),
+							 borrow=borrow)
+	return shared_x, shared_y
+
+train_set_x, train_set_y = shared_dataset(
+	mnist_data['X'][:50000,:],mnist_data['Y'][:50000,:])
+valid_set_x, valid_set_y = shared_dataset(
+	mnist_data['X'][50000:51000,:],mnist_data['Y'][50000:51000,:])
+test_set_x, test_set_y = shared_dataset(
+	mnist_data['X_test'],mnist_data['Y_test'])
+
+del mnist_data, tmp
+
+sN = train_set_x.get_value().shape[0]
+learning_rate = 1e-3
+momentum = 0.9
+bN = 100
 tN = 1000
 
-xval = rd.uniform(-5,5,sN).reshape(sN,1)
-trainx = theano.shared(
-			value = np.matrix(xval,
-				dtype = theano.config.floatX),
-			borrow = True
-			)
+# xval = rd.uniform(-1,1,sN).reshape(sN,1)
+# trainx = theano.shared(
+# 			value = np.matrix(xval,
+# 				dtype = theano.config.floatX),
+# 			borrow = True
+# 			)
 
-yval = np.asarray(np.sin(xval),
-				dtype = theano.config.floatX)
-trainy = theano.shared(
-		value = yval,
-		borrow = True
-		)
+# yval = np.asarray(np.square(xval),
+# 				dtype = theano.config.floatX)
+# trainy = theano.shared(
+# 		value = yval,
+# 		borrow = True
+# 		)
 
 x = T.matrix('x')
 y = T.matrix('y')
 ind = T.lvector()
 
-nn = nnet2(x, xval.shape[1], [10, 10], yval.shape[1], 
-	hid_act = T.nnet.sigmoid, out_act = None)
+nn = nnet2(x, train_set_x.get_value().shape[1], 
+		[1000], train_set_y.get_value().shape[1], 
+	hid_act = T.nnet.softplus, out_act = T.nnet.softmax)
+
 output = nn.output
+outclass = nn.outclass
 cost = nn.mse(y)
+err = nn.error(y)
 gparams = [T.grad(cost, param) for param in nn.params]
 
 vparams = [theano.shared(np.zeros(param.get_value().shape),
@@ -44,47 +78,58 @@ vparams = [theano.shared(np.zeros(param.get_value().shape),
 			for param in nn.params
 ]
 
+# momentum
 update1 = [
 	(vparam, momentum * vparam + learning_rate * gparam) 
 	for vparam, gparam in zip(vparams, gparams)
 ]
+# change
 update2 = [
 	(param, param - vparam) 
 	for param, vparam in zip(nn.params, vparams)
 ]
 
+print '...building train function'
 train_model = theano.function(
 	inputs=[ind],
-	outputs=[cost],
+	outputs=[cost,err],
 	updates=update1 + update2,
 	givens={
-		x: trainx[ind],
-		y: trainy[ind]
+		x: train_set_x[ind],
+		y: train_set_y[ind]
 	}
 )
 
+print '...building predict function'
 predict = theano.function(
 	inputs = [ind],
-	outputs = [output],
+	outputs = [output,outclass],
 	givens={
-		x: trainx[ind]
+		x: train_set_x[ind]
 	}
 )
 
-
+print '...training'
 epoch_mse = np.zeros(tN)
+epoch_err = np.zeros(tN)
 for i in range(tN):
 	index = rd.randint(0,sN,bN)
 	epoch_mse[i] = train_model(index)[0]
+	epoch_err[i] = train_model(index)[1]
 
-pred = np.asarray(predict(range(sN))).reshape(sN,1)
+	if i%100==0: 
+		print epoch_mse[i], epoch_err[i]
+
+# pred = np.asarray(predict(range(sN))).reshape(sN,1)
 
 plt.figure()
 plt.plot(range(tN),epoch_mse)
 
 plt.figure()
-plt.plot(xval,pred,'ro',label='Prediction')
-plt.plot(xval,yval,'bo',label='True Value')
+plt.plot(range(tN),epoch_err)
+# plt.figure()
+# plt.plot(xval,pred,'ro',label='Prediction')
+# plt.plot(xval,yval,'bo',label='True Value')
 plt.show()
 
 

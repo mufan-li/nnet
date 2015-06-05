@@ -76,11 +76,13 @@ class nnet2(object):
 			x_in = self.layers[i].output
 
 		self.output = x_in
-
+		self.outclass = T.argmax(self.output, axis=1)
 
 	def mse(self, y):
 		return T.mean(T.square(self.output - y))
 
+	def error(self,y):
+		return T.mean(T.neq(self.outclass, T.argmax(y, axis=1)))
 
 if __name__ == "__main__":
 
