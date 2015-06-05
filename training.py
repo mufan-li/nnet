@@ -1,9 +1,9 @@
 
 # script for training nnet
 hV = [1000, 1000]
-bN = 500 # mini-batch size
+bN = 100 # mini-batch size
 eta0 = 1e-5 # learning rate
-tN = int(5e5) # epochs/sgd iterations
+tN = int(5e3) # epochs/sgd iterations
 fN = 100 # update frequency
 
 nn = nnet(train.xN, hV, train.yN, bN)
