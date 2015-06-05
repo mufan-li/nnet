@@ -49,7 +49,7 @@ class nnet2(object):
 	def __init__(self, x, n_in, v_hidden, n_out, 
 		hid_act = T.nnet.sigmoid, out_act = T.nnet.softmax):
 
-		if type(v_hidden) != type([]) or \
+		if type(v_hidden) != type([0]) and \
 			type(v_hidden) != type(np.array([])):
 			v_hidden = [v_hidden]
 
