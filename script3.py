@@ -43,7 +43,7 @@ test_set_x, test_set_y = shared_dataset(
 del mnist_data, tmp
 
 sN = train_set_x.get_value().shape[0]
-learning_rate = 1e-3
+learning_rate = 1e-5
 momentum = 0.9
 bN = 100
 tN = 10 # number of epochs
@@ -52,13 +52,18 @@ x = T.matrix('x')
 y = T.matrix('y')
 ind = T.lvector()
 
+def relu(x):
+    return theano.tensor.switch(x<0, 0, x)
+
 nn = nnet2(x, train_set_x.get_value().shape[1], 
 		[1000, 1000], train_set_y.get_value().shape[1], 
-	hid_act = T.nnet.softplus, out_act = T.nnet.softmax)
+	hid_act = relu, out_act = T.nnet.softmax)
 
 output = nn.output
 outclass = nn.outclass
-cost = nn.mse(y)
+# cost = nn.mse(y)
+cost = nn.nll(y)
+cost2 = nn.nll(y)
 err = nn.error(y)
 gparams = [T.grad(cost, param) for param in nn.params]
 
@@ -92,7 +97,7 @@ train_model = theano.function(
 print '...building validation function'
 valid_model = theano.function(
 	inputs = [ind],
-	outputs = [cost, err],
+	outputs = [cost2, err],
 	givens = {
 		x: valid_set_x[ind],
 		y: valid_set_y[ind]
@@ -104,12 +109,13 @@ predict = theano.function(
 	inputs = [ind],
 	outputs = [output,outclass],
 	givens={
-		x: train_set_x[ind]
+		x: valid_set_x[ind]
 	}
 )
 
 print '...training'
-epoch_mse = np.zeros(tN)
+# epoch_mse = np.zeros(tN)
+epoch_nll = np.zeros(tN)
 epoch_err = np.zeros(tN)
 batchlist = range(sN/bN)
 
@@ -123,9 +129,10 @@ for i in range(tN):
 		train_model(index)
 
 	# update for each epoch only
-	index = rd.randint(0,valid_set_x.get_value().shape[0],1000)
+	index = rd.randint(0,valid_set_x.get_value().shape[0],10000)
 	temp = valid_model(index)
-	epoch_mse[i] = temp[0]
+	# epoch_mse[i] = temp[0]
+	epoch_nll[i] = temp[0]
 	epoch_err[i] = temp[1]
 
 	cur_time = time.time() - start_time
@@ -134,13 +141,13 @@ for i in range(tN):
 		 np.round(prog*100,1), '%'
 	print 'time:', np.round(cur_time,1), 's', \
 		', time remaining:', np.round(cur_time/prog*(1-prog)),'s'
-	print 'MSE:', np.round(epoch_mse[i],4), \
+	print 'NLL:', np.round(epoch_nll[i],4), \
 		', Error:', np.round(epoch_err[i],4), '\n'
 
 # pred = np.asarray(predict(range(sN))).reshape(sN,1)
 
 plt.figure()
-plt.plot(range(tN),epoch_mse)
+plt.plot(range(tN),epoch_nll)
 
 plt.figure()
 plt.plot(range(tN),epoch_err)

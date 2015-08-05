@@ -81,13 +81,19 @@ class nnet2(object):
 	def mse(self, y):
 		return T.mean(T.square(self.output - y))
 
+	def nll(self, y):
+		# return - T.mean(T.dot(T.log(self.output.T), y))
+		return -T.mean(
+			T.log(self.output)[T.arange(y.shape[0]), 
+				T.argmax(y,axis=1)])
+
 	def error(self,y):
 		return T.mean(T.neq(self.outclass, T.argmax(y, axis=1)))
 
 if __name__ == "__main__":
 
 	sN = 100
-	learning_rate = 1e-1
+	learning_rate = 1e-5
 	momentum = 0.9
 
 	xval = rd.uniform(0,5,sN).reshape(sN,1)
@@ -99,6 +105,7 @@ if __name__ == "__main__":
 
 	yval = np.asarray((xval>2).astype(float),
 					dtype = theano.config.floatX)
+	yval = np.concatenate([yval,1-yval],1);
 	trainy = theano.shared(
 			value = yval,
 			borrow = True
@@ -109,9 +116,10 @@ if __name__ == "__main__":
 	end = T.lscalar()
 
 	nn = nnet2(x, xval.shape[1], 2, yval.shape[1], 
-		out_act = None)
+		out_act = T.nnet.softmax)
 	output = nn.output
-	cost = nn.mse(y)
+	# cost = nn.mse(y)
+	cost = nn.nll(y)
 	gparams = [T.grad(cost, param) for param in nn.params]
 	
 	vparams = [theano.shared(param.get_value(),borrow=True)
@@ -119,11 +127,11 @@ if __name__ == "__main__":
 	]
 
 	update1 = [
-		(vparam, momentum * vparam + learning_rate * gparam) 
+		(vparam, momentum * vparam - learning_rate * gparam) 
 		for vparam, gparam in zip(vparams, gparams)
 	]
 	update2 = [
-		(param, param - vparam) 
+		(param, param + vparam) 
 		for param, vparam in zip(nn.params, vparams)
 	]
 
@@ -138,8 +146,8 @@ if __name__ == "__main__":
 	)
 
 	bN = sN
-	for i in range(3):
-		print train_model(bN)
+	for i in range(10):
+		print train_model(bN)[0]
 
 	# theano.printing.pprint(nn.output)
 	# theano.printing.debugprint(gparams[0])
